@@ -32,7 +32,7 @@ const
       if (dataElf.link.length != 1)
         fail("the .link(dbStr) method supposed to expect one argument")
 
-      if (dataElf.link('test.json') != dataElf)
+      if (await dataElf.link('test.json') != dataElf)
         fail(".link(dbStr) method supposed to return the same dataElf object")
 
       if (!dataElf.db || typeof dataElf.db != 'object')
