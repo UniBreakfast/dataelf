@@ -1,5 +1,6 @@
 
 const { max } = Math, { isArray } = Array, { values } = Object,
+e = e => 0,
 fsp = require('fs').promises,
 
 findMaxId = obj => max(+obj.id||0,...(isArray(obj)? obj : values(obj))
@@ -10,10 +11,10 @@ module.exports = async filename => {
   const
     read = async queryFn =>
       await queryFn(JSON.parse(await fsp.readFile(filename, 'utf8')
-        .catch(()=>{}) || '{}')),
+        .catch(e) || '{}')),
 
     update = async queryFn => {
-      const file = await fsp.readFile(filename, 'utf8') || '{}',
+      const file = await fsp.readFile(filename, 'utf8').catch(e) || '{}',
             store = JSON.parse(file)
       try {
         const result = await queryFn(store, newId),

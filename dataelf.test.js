@@ -2,6 +2,7 @@
 const
   { assign, values } = Object,
   c = console.log,
+  fsp = require('fs').promises,
   jsonSame =(a, b)=> JSON.stringify(a) == JSON.stringify(b),
   e = e => e,
   test = (title, finish, err) => [
@@ -35,6 +36,8 @@ const
       if (dataElf.link.length != 1)
         fail("the .link(dbStr) method supposed to expect one argument")
 
+      await fsp.unlink('test.json').catch(e)
+
       if (await dataElf.link('test.json') != dataElf)
         fail(".link(dbStr) method supposed to return the same dataElf object")
 
@@ -57,6 +60,7 @@ const
         crit(`but dataElf doesn't even have .${m}() method!`)
     })
 
+    await dataElf.addArr('users').catch(c)
 
     if (await dataElf.user(1) !== null)
       fail("dataElf.user(id) supposed to return null if there is none")
@@ -72,12 +76,13 @@ const
     if (await dataElf.addUser(...values(bob)) != false)
       fail("dataElf.addUser(login, hash) doesn't return false whed login occupied")
 
-    if (!jsonSame(assign(bob, {id:1}), await dataElf.user(1)))
+    if (!jsonSame({id:1,...bob}, await dataElf.user(1)))
       fail("dataElf.user(id) doesn't find the previously added user's record by id")
 
-    if (!jsonSame(assign(bob, {id:1}), await dataElf.user({login: 'Bob'})))
+    if (!jsonSame({id:1,...bob}, await dataElf.user({login: 'Bob'})))
       fail("dataElf.user({login}) doesn't find the previously added user's record by login")
 
+    ok()
   }
 
 runTests()
