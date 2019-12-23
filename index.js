@@ -10,7 +10,7 @@ update = async queryFn => {
         store = JSON.parse(file)
   try {
     const result = await queryFn(store),
-          json = JSON.stringify(store, ' ', 2)
+          json = JSON.stringify(store, null, 2)
     if (file != json) await fsp.writeFile(dbStr, json)
     return result
   }
@@ -22,11 +22,11 @@ update = async queryFn => {
 addArr = async (...names)=>
   await update(store => names.forEach(name => store[name] = store[name] || [])),
 
-init = str => {
+link = str => {
   dbStr = str
   return Object.assign(module.exports, {db: {read, update}, addArr})
 }
 
 let dbStr
 
-module.exports = {init}
+module.exports = {link}
