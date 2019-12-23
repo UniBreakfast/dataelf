@@ -1,7 +1,9 @@
 
 const
-  { assign } = Object,
+  { assign, values } = Object,
   c = console.log,
+  jsonSame =(a, b)=> JSON.stringify(a) == JSON.stringify(b),
+  e = e => e,
   test = (title, finish, err) => [
     msg => !err && c("TEST: "+title) || c("FAIL: "+msg) || (err=1),
     ()=> !err && (c("TEST: "+title) || c("OK: "+finish)),
@@ -9,10 +11,11 @@ const
   ],
 
   dataElf = require('.'),
-  methods = 'addArr'.split(', '),
+  methods = 'addArr, addUser, user'.split(', '),
 
   runTests = async ()=> {
     await init()
+    await users().catch(e)
   },
 
   init = async ()=> {
@@ -44,6 +47,37 @@ const
         fail("dataElf supposed to have methods: "+absent.join(', '))
     }
     ok()
+  },
+
+  users = async ()=> {
+    const [ fail, ok, crit ] = test("dataElf.addUser(login, hash) supposed to add users and dataElf.user(id | {login}) supposed to get them", "and they work as they should!")
+
+    'addUser, user'.split(', ').forEach(m => {
+      if (!methods.includes(m))
+        crit(`but dataElf doesn't even have .${m}() method!`)
+    })
+
+
+    if (await dataElf.user(1) !== null)
+      fail("dataElf.user(id) supposed to return null if there is none")
+
+    if (await dataElf.user({login: 'Bob'}) !== null)
+      fail("dataElf.user({login}) supposed to return null if there is none")
+
+    const bob = {login: 'Bob', hash: 'sd7f6t87rew98sf9'}
+
+    if (await dataElf.addUser(...values(bob)) != 1)
+      fail("dataElf.addUser(login, hash) doesn't return id of added record")
+
+    if (await dataElf.addUser(...values(bob)) != false)
+      fail("dataElf.addUser(login, hash) doesn't return false whed login occupied")
+
+    if (!jsonSame(assign(bob, {id:1}), await dataElf.user(1)))
+      fail("dataElf.user(id) doesn't find the previously added user's record by id")
+
+    if (!jsonSame(assign(bob, {id:1}), await dataElf.user({login: 'Bob'})))
+      fail("dataElf.user({login}) doesn't find the previously added user's record by login")
+
   }
 
 runTests()
