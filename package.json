@@ -1,0 +1,20 @@
+{
+  "name": "dataElf",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "node dataelf.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/UniBreakfast/dataelf.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/UniBreakfast/dataelf/issues"
+  },
+  "homepage": "https://github.com/UniBreakfast/dataelf#readme"
+}
