@@ -12,7 +12,7 @@ const
   ],
 
   dataElf = require('.'),
-  methods = 'addArr, addUser, user'.split(', '),
+  methods = 'addArr, user, addUser, updUser'.split(', '),
 
   runTests = async ()=> {
     await init()
@@ -53,9 +53,9 @@ const
   },
 
   users = async ()=> {
-    const [ fail, ok, crit ] = test("dataElf.addUser(login, hash) supposed to add users and dataElf.user(id | {login}) supposed to get them", "and they work as they should!")
+    const [ fail, ok, crit ] = test("dataElf.addUser(login, hash) supposed to add users, dataElf.updUser(id | {prop}, {prop}) supposed to update them and dataElf.user(id | {prop}) supposed to get them", "and they work as they should!")
 
-    'addUser, user'.split(', ').forEach(m => {
+    'user, addUser, updUser'.split(', ').forEach(m => {
       if (!methods.includes(m))
         crit(`but dataElf doesn't even have .${m}() method!`)
     })
@@ -73,14 +73,23 @@ const
     if (await dataElf.addUser(...values(bob)) != 1)
       fail("dataElf.addUser(login, hash) doesn't return id of added record")
 
-    if (await dataElf.addUser(...values(bob)) != false)
+    if (await dataElf.addUser(...values(bob)) !== false)
       fail("dataElf.addUser(login, hash) doesn't return false whed login occupied")
 
     if (!jsonSame({id:1,...bob}, await dataElf.user(1)))
       fail("dataElf.user(id) doesn't find the previously added user's record by id")
 
-    if (!jsonSame({id:1,...bob}, await dataElf.user({login: 'Bob'})))
+    if (!jsonSame({id:1,...bob}, await dataElf.user(bob)))
       fail("dataElf.user({login}) doesn't find the previously added user's record by login")
+
+    if (await dataElf.updUser(2, {guess: 3}) !== false)
+      fail("dataElf.updUser(id, {prop}) doesn't return false when there's no user with that id")
+
+    if (await dataElf.updUser(1, {guess: 3}) !== true)
+      fail("dataElf.updUser(id, {prop}) doesn't return true when record updated")
+
+    if (!jsonSame({id:1,...bob, guess: 3}, await dataElf.user(1)))
+      fail("dataElf.updUser(id, {prop}) didn't update the user record")
 
     ok()
   }
