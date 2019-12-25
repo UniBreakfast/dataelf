@@ -1,19 +1,9 @@
 
 const
+  makeTest = require('./tester'),
   { assign, values } = Object,
   c = console.log,
   fsp = require('fs').promises,
-  jsonSame =(a, b)=> JSON.stringify(a) == JSON.stringify(b),
-  test = (title, finish, err) => [
-    msg => !err && c("TEST: "+title) || c("FAIL: "+msg) || (err=1),
-    ()=> !err && (c("TEST: "+title) || c("OK: "+finish)),
-    msg => {!err && c("TEST: "+title) || c("FAIL: "+msg) || (err=1); throw msg}
-  ],
-  makeTest =(title, ok, checkFn)=> async swallow => {
-    const [ fail, end, crit ] = test(title, ok)
-    await checkFn(fail, crit).catch(err => {if (!swallow) throw err})
-    end()
-  },
 
   dataElf = require('.'),
   methods = 'addArr, user, addUser, updUser'.split(', '),
@@ -24,7 +14,8 @@ const
   },
 
   init = makeTest("dataElf module supposed to be exporting an object with one method - a function .link(dbStr), that supposed to initialize the dataElf with a reference to a db object and add the rest of the methods, also it supposed to return the dataElf object itself", "and it does all that!",
-  async (fail, crit)=> {
+    async (fail, crit)=> {
+
     const absent = []
 
     if (typeof dataElf != 'object')
@@ -77,10 +68,10 @@ const
     if (await dataElf.addUser(...values(bob)) !== false)
       fail("dataElf.addUser(login, hash) doesn't return false whed login occupied")
 
-    if (!jsonSame({id:1,...bob}, await dataElf.user(1)))
+    if (!JSON.same({id:1,...bob}, await dataElf.user(1)))
       fail("dataElf.user(id) doesn't find the previously added user's record by id")
 
-    if (!jsonSame({id:1,...bob}, await dataElf.user(bob)))
+    if (!JSON.same({id:1,...bob}, await dataElf.user(bob)))
       fail("dataElf.user({login}) doesn't find the previously added user's record by login")
 
     if (await dataElf.updUser(2, {guess: 3}) !== false)
@@ -89,13 +80,8 @@ const
     if (await dataElf.updUser(1, {guess: 3}) !== true)
       fail("dataElf.updUser(id, {prop}) doesn't return true when record updated")
 
-    if (!jsonSame({id:1,...bob, guess: 3}, await dataElf.user(1)))
+    if (!JSON.same({id:1,...bob, guess: 3}, await dataElf.user(1)))
       fail("dataElf.updUser(id, {prop}) didn't update the user record")
   })
 
 runTests()
-
-
-
-// assign(global, {c, dataElf})
-// setTimeout(c, 1e7)
