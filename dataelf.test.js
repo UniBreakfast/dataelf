@@ -1,7 +1,7 @@
 
 const
   makeTest = require('./tester'),
-  { assign, values } = Object,
+  { assign, keys, values } = Object,
   c = console.log,
   fsp = require('fs').promises,
 
@@ -21,7 +21,7 @@ const
     if (typeof dataElf != 'object')
       fail("index.js doesn't export an object")
 
-    if (Object.keys(dataElf).length != 1)
+    if (keys(dataElf).length != 1)
       fail("dataElf object expected to have exactly one property at first")
 
     if (!dataElf.link || typeof dataElf.link != 'function')

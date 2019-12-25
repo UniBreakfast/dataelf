@@ -1,0 +1,10 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "login": "Bob",
+      "hash": "sd7f6t87rew98sf9",
+      "guess": 3
+    }
+  ]
+}
