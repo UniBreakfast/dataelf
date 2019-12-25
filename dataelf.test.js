@@ -4,25 +4,28 @@ const
   c = console.log,
   fsp = require('fs').promises,
   jsonSame =(a, b)=> JSON.stringify(a) == JSON.stringify(b),
-  e = e => e,
   test = (title, finish, err) => [
     msg => !err && c("TEST: "+title) || c("FAIL: "+msg) || (err=1),
     ()=> !err && (c("TEST: "+title) || c("OK: "+finish)),
-    msg => {!err && c("TEST: "+title) || c("FAIL: "+msg); throw msg}
+    msg => {!err && c("TEST: "+title) || c("FAIL: "+msg) || (err=1); throw msg}
   ],
+  makeTest =(title, ok, checkFn)=> async swallow => {
+    const [ fail, end, crit ] = test(title, ok)
+    await checkFn(fail, crit).catch(err => {if (!swallow) throw err})
+    end()
+  },
 
   dataElf = require('.'),
   methods = 'addArr, user, addUser, updUser'.split(', '),
 
   runTests = async ()=> {
     await init()
-    await users().catch(e)
+    await users(1)
   },
 
-  init = async ()=> {
-    const
-      [ fail, ok, crit ] = test("dataElf module supposed to be exporting an object with one method - a function .link(dbStr), that supposed to initialize the dataElf with a reference to a db object and add the rest of the methods, also it supposed to return the dataElf object itself", "and it does all that!"),
-      absent = []
+  init = makeTest("dataElf module supposed to be exporting an object with one method - a function .link(dbStr), that supposed to initialize the dataElf with a reference to a db object and add the rest of the methods, also it supposed to return the dataElf object itself", "and it does all that!",
+  async (fail, crit)=> {
+    const absent = []
 
     if (typeof dataElf != 'object')
       fail("index.js doesn't export an object")
@@ -36,7 +39,7 @@ const
       if (dataElf.link.length != 1)
         fail("the .link(dbStr) method supposed to expect one argument")
 
-      await fsp.unlink('test.json').catch(e)
+      await fsp.unlink('test.json').catch(_=>0)
 
       if (await dataElf.link('test.json') != dataElf)
         fail(".link(dbStr) method supposed to return the same dataElf object")
@@ -49,11 +52,9 @@ const
       if (absent.length)
         fail("dataElf supposed to have methods: "+absent.join(', '))
     }
-    ok()
-  },
+  }),
 
-  users = async ()=> {
-    const [ fail, ok, crit ] = test("dataElf.addUser(login, hash) supposed to add users, dataElf.updUser(id | {prop}, {prop}) supposed to update them and dataElf.user(id | {prop}) supposed to get them", "and they work as they should!")
+  users = makeTest("dataElf.addUser(login, hash) supposed to add users, dataElf.updUser(id | {prop}, {prop}) supposed to update them and dataElf.user(id | {prop}) supposed to get them", "and they work as they should!", async (fail, crit)=> {
 
     'user, addUser, updUser'.split(', ').forEach(m => {
       if (!methods.includes(m))
@@ -90,11 +91,11 @@ const
 
     if (!jsonSame({id:1,...bob, guess: 3}, await dataElf.user(1)))
       fail("dataElf.updUser(id, {prop}) didn't update the user record")
-
-    ok()
-  }
+  })
 
 runTests()
+
+
 
 // assign(global, {c, dataElf})
 // setTimeout(c, 1e7)

@@ -25,7 +25,7 @@ updUser = async (opt, upd)=> await update(store => {
 
 link = async str => assign(module.exports,
   {db: { read, update } = db = await jsonStore(str),
-    addArr, user, addUser, updUser})
+    addArr, /* user, */ addUser, updUser})
 
 
 module.exports = {link}
