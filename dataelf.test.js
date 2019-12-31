@@ -6,11 +6,12 @@ const
   fsp = require('fs').promises,
 
   dataElf = require('.'),
-  methods = 'addArr, user, addUser, updUser'.split(', '),
+  methods = 'addArr, user, addUser, updUser, siftSess, sess, ses, addSes, updSes'.split(', '),
 
   runTests = async ()=> {
     await init()
     await users(1)
+    await sessions(1)
   },
 
   init = makeTest("dataElf module supposed to be exporting an object with one method - a function .link(dbStr), that supposed to initialize the dataElf with a reference to a db object and add the rest of the methods, also it supposed to return the dataElf object itself", "and it does all that!",
@@ -82,6 +83,20 @@ const
 
     if (!JSON.same({id:1,...bob, guess: 3}, await dataElf.user(1)))
       fail("dataElf.updUser(id, {prop}) didn't update the user record")
+  }),
+
+  sessions = makeTest("dataElf.siftSess() is supposed to delete all sessions that have expired, dataElf.sess(num) is supposed to get num least idle sessions, dataElf.addSes(ses) is supposed to add sessions, dataElf.updSes(id | {prop}, {prop}) supposed to update them and dataElf.ses(id | {prop}) supposed to get the certain ones", "and they work as they should!", async (fail, crit)=> {
+
+    'siftSess, sess, ses, addSes, updSes'.split(', ').forEach(m => {
+      if (!methods.includes(m))
+        crit(`but dataElf doesn't even have .${m}() method!`)
+    })
+
+    await dataElf.addArr('users').catch(c)
+
+    if (await dataElf.ses(1) !== null)
+      fail("dataElf.ses(sid) supposed to return null if there is none")
+
   })
 
 runTests()
