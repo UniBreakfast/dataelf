@@ -6,7 +6,7 @@ const
   fsp = require('fs').promises,
 
   dataElf = require('.'),
-  methods = 'addArr, user, addUser, updUser, siftSess, sess, ses, addSes, updSes'.split(', '),
+  methods = 'addArr, user, addUser, updUser, siftSess, sess, ses, addSes, updSes, delSes'.split(', '),
 
   runTests = async ()=> {
     await init()
@@ -111,7 +111,7 @@ const
       fail("dataElf.addSes(ses) doesn't return id of added record")
 
     if (!JSON.same({id: sid1,...ses1}, await dataElf.ses(sid1)))
-      fail("dataElf.ses(sid) doesn't find the previously added session record by id")
+      crit("dataElf.ses(sid) doesn't find the previously added session record by id")
 
     if(!JSON.same([{id: sid1,...ses1}, {id: sid2,...ses2}],
         await dataElf.sess()))
@@ -123,6 +123,17 @@ const
         await dataElf.sess(2)))
       fail("dataElf.sess(num) doesn't return num last checked sessions")
 
+    if (await dataElf.updSes(13, {checked: ses1.checked+10}) !== false)
+      fail("dataElf.updSes(sid, {...props}) doesn't return false if record not found")
+
+    if (await dataElf.updSes(sid1,  {checked: ses1.checked+10,
+          tokens: [...ses1.tokens, 'o3iu25p3u45p2iu4p52oiu43']}) !== true)
+      fail("dataElf.updSes(sid, {...props}) doesn't return true when record is updated")
+
+    if (!JSON.same({id: sid1,...ses1, checked: ses1.checked+10,
+      tokens: [...ses1.tokens, 'o3iu25p3u45p2iu4p52oiu43']},
+        await dataElf.ses(sid1)))
+      fail("dataElf.updSes(sid, {...props}) didn't update the session record")
 
   })
 
