@@ -61,41 +61,55 @@ const
     if (await dataElf.user({login: 'Bob'}) !== null)
       fail("dataElf.user({login}) supposed to return null if there is none")
 
-    const bob = {login: 'Bob', hash: 'sd7f6t87rew98sf9'}
+    const bob = {login: 'Bob', hash: 'sd7f6t87rew98sf9'},
 
-    if (await dataElf.addUser(...values(bob)) != 1)
+          id = await dataElf.addUser(...values(bob))
+
+    if (!id)
       fail("dataElf.addUser(login, hash) doesn't return id of added record")
 
     if (await dataElf.addUser(...values(bob)) !== false)
       fail("dataElf.addUser(login, hash) doesn't return false whed login occupied")
 
-    if (!JSON.same({id:1,...bob}, await dataElf.user(1)))
+    if (!JSON.same({id,...bob}, await dataElf.user(id)))
       fail("dataElf.user(id) doesn't find the previously added user's record by id")
 
-    if (!JSON.same({id:1,...bob}, await dataElf.user(bob)))
+    if (!JSON.same({id,...bob}, await dataElf.user(bob)))
       fail("dataElf.user({login}) doesn't find the previously added user's record by login")
 
     if (await dataElf.updUser(2, {guess: 3}) !== false)
       fail("dataElf.updUser(id, {prop}) doesn't return false when there's no user with that id")
 
-    if (await dataElf.updUser(1, {guess: 3}) !== true)
+    if (await dataElf.updUser(id, {guess: 3}) !== true)
       fail("dataElf.updUser(id, {prop}) doesn't return true when record updated")
 
-    if (!JSON.same({id:1,...bob, guess: 3}, await dataElf.user(1)))
+    if (!JSON.same({id,...bob, guess: 3}, await dataElf.user(id)))
       fail("dataElf.updUser(id, {prop}) didn't update the user record")
   }),
 
-  sessions = makeTest("dataElf.siftSess() is supposed to delete all sessions that have expired, dataElf.sess(num) is supposed to get num least idle sessions, dataElf.addSes(ses) is supposed to add sessions, dataElf.updSes(id | {prop}, {prop}) supposed to update them and dataElf.ses(id | {prop}) supposed to get the certain ones", "and they work as they should!", async (fail, crit)=> {
+  sessions = makeTest("dataElf.siftSess() is supposed to delete all sessions that have expired, dataElf.sess(num) is supposed to get num least idle sessions, dataElf.addSes(ses) is supposed to add sessions, dataElf.updSes(sid, {prop}) supposed to update them, dataElf.delSes(sid) supposed to update them and dataElf.ses(sid) supposed to get the certain ones", "and they work as they should!", async (fail, crit)=> {
 
     'siftSess, sess, ses, addSes, updSes'.split(', ').forEach(m => {
       if (!methods.includes(m))
         crit(`but dataElf doesn't even have .${m}() method!`)
     })
 
-    await dataElf.addArr('users').catch(c)
+    await dataElf.addArr('sessions').catch(c)
 
     if (await dataElf.ses(1) !== null)
       fail("dataElf.ses(sid) supposed to return null if there is none")
+
+    const ses = {userid: 1, tokens: ['76s7fs6g07fg09s7fg09sd7f09g7d0g97sg67'],
+      userTimeout: 123456789, started: 1577822531979, checked: 1577822531989},
+
+      sid = await dataElf.addSes(ses)
+
+    if (!sid)
+      fail("dataElf.addSes(ses) doesn't return id of added record")
+
+    if (!JSON.same({id: sid,...ses}, await dataElf.ses(sid)))
+      fail("dataElf.ses(sid) doesn't find the previously added session record by id")
+
 
   })
 
