@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/UniBreakfast/dataelf/issues"
   },
-  "homepage": "https://github.com/UniBreakfast/dataelf#readme"
+  "homepage": "https://github.com/UniBreakfast/dataelf#readme",
+  "dependencies": {
+    "mongodb": "^3.4.1"
+  }
 }

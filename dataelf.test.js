@@ -86,7 +86,7 @@ const
       fail("dataElf.updUser(id, {prop}) didn't update the user record")
   }),
 
-  sessions = makeTest("dataElf.siftSess() is supposed to delete all sessions that have expired, dataElf.sess(num) is supposed to get num least idle sessions, dataElf.addSes(ses) is supposed to add sessions, dataElf.updSes(sid, {prop}) supposed to update them, dataElf.delSes(sid) supposed to update them and dataElf.ses(sid) supposed to get the certain ones", "and they work as they should!", async (fail, crit)=> {
+  sessions = makeTest("dataElf.siftSess() is supposed to delete all sessions that have expired, dataElf.sess(num) is supposed to get num least idle sessions, dataElf.addSes(ses) is supposed to add sessions, dataElf.updSes(sid, {prop}) supposed to update them, dataElf.delSes(sid) supposed to update them and dataElf.ses(sid) supposed to get the certain ones", "and they work as they should!", async (fail, crit, sleep)=> {
 
     'siftSess, sess, ses, addSes, updSes, delSes'.split(', ').forEach(m => {
       if (!dataElf[m]) crit(`but dataElf doesn't even have .${m}() method!`)
@@ -117,7 +117,7 @@ const
         await dataElf.sess()))
       fail("dataElf.sess() doesn't return all previously added sessions")
 
-    await dataElf.addSes(ses3)
+    const sid3 = await dataElf.addSes(ses3)
 
     if(!JSON.same([{id: sid1,...ses1}, {id: sid2,...ses2}],
         await dataElf.sess(2)))
@@ -135,6 +135,24 @@ const
         await dataElf.ses(sid1)))
       fail("dataElf.updSes(sid, {...props}) didn't update the session record")
 
+    if (await dataElf.delSes(13) !== false)
+      fail("dataElf.delSes(sid) didn't return false when session is not found")
+
+    if (await dataElf.delSes(sid1) !== true)
+      fail("dataElf.delSes(sid) didn't return true when session is deleted")
+
+    if (await dataElf.ses(sid1) !== false)
+      fail("dataElf.delSes(sid) didn't delete the session")
+
+
+    /*
+    const minute = 6e4, ten = 10*minute, twenty = 2*ten, forty = 4*ten,
+          fifty = 5*ten, now = Date.now()
+
+
+    'sessions without timeouts or with timeouts in the future should stay, sessions with timeout or userTimeout in the past should disappear'
+
+    await dataElf.updSes(sid1, {}) */
   })
 
 runTests()
