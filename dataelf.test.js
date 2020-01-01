@@ -49,14 +49,13 @@ const
   users = makeTest("dataElf.addUser(login, hash) supposed to add users, dataElf.updUser(id | {prop}, {prop}) supposed to update them and dataElf.user(id | {prop}) supposed to get them", "and they work as they should!", async (fail, crit)=> {
 
     'user, addUser, updUser'.split(', ').forEach(m => {
-      if (!methods.includes(m))
-        crit(`but dataElf doesn't even have .${m}() method!`)
+      if (!dataElf[m]) crit(`but dataElf doesn't even have .${m}() method!`)
     })
 
     await dataElf.addArr('users').catch(c)
 
     if (await dataElf.user(1) !== null)
-      fail("dataElf.user(id) supposed to return null if there is none")
+      crit("dataElf.user(id) supposed to return null if there is none")
 
     if (await dataElf.user({login: 'Bob'}) !== null)
       fail("dataElf.user({login}) supposed to return null if there is none")
@@ -89,26 +88,40 @@ const
 
   sessions = makeTest("dataElf.siftSess() is supposed to delete all sessions that have expired, dataElf.sess(num) is supposed to get num least idle sessions, dataElf.addSes(ses) is supposed to add sessions, dataElf.updSes(sid, {prop}) supposed to update them, dataElf.delSes(sid) supposed to update them and dataElf.ses(sid) supposed to get the certain ones", "and they work as they should!", async (fail, crit)=> {
 
-    'siftSess, sess, ses, addSes, updSes'.split(', ').forEach(m => {
-      if (!methods.includes(m))
-        crit(`but dataElf doesn't even have .${m}() method!`)
+    'siftSess, sess, ses, addSes, updSes, delSes'.split(', ').forEach(m => {
+      if (!dataElf[m]) crit(`but dataElf doesn't even have .${m}() method!`)
     })
 
     await dataElf.addArr('sessions').catch(c)
 
     if (await dataElf.ses(1) !== null)
-      fail("dataElf.ses(sid) supposed to return null if there is none")
+      crit("dataElf.ses(sid) supposed to return null if there is none")
 
-    const ses = {userid: 1, tokens: ['76s7fs6g07fg09s7fg09sd7f09g7d0g97sg67'],
+    const ses1 = {userid: 1, tokens: ['76s7fs6g07fg09s7fg09sd7f09g7d0g97sg67'],
       userTimeout: 123456789, started: 1577822531979, checked: 1577822531989},
+      ses2 = {userid: 2, tokens: ['4mb23vm6bvm3246vm23nbv45mn32v5mn35'],
+        userTimeout: 234567891, started: 1578438345433, checked: 1578438345443},
+      ses3 = {userid: 2, tokens: ['0sadf0a8d7f098a7sd0f987a0d8f70aadsf'],
+        userTimeout: 234567891, started: 1576438345433, checked: 1576438345443},
 
-      sid = await dataElf.addSes(ses)
+      sid1 = await dataElf.addSes(ses1),
+      sid2 = await dataElf.addSes(ses2)
 
-    if (!sid)
+    if (!sid1)
       fail("dataElf.addSes(ses) doesn't return id of added record")
 
-    if (!JSON.same({id: sid,...ses}, await dataElf.ses(sid)))
+    if (!JSON.same({id: sid1,...ses1}, await dataElf.ses(sid1)))
       fail("dataElf.ses(sid) doesn't find the previously added session record by id")
+
+    if(!JSON.same([{id: sid1,...ses1}, {id: sid2,...ses2}],
+        await dataElf.sess()))
+      fail("dataElf.sess() doesn't return all previously added sessions")
+
+    await dataElf.addSes(ses3)
+
+    if(!JSON.same([{id: sid1,...ses1}, {id: sid2,...ses2}],
+        await dataElf.sess(2)))
+      fail("dataElf.sess(num) doesn't return num last checked sessions")
 
 
   })

@@ -43,10 +43,14 @@ updSes = async (sid, upd)=> {
 
 },
 
+delSes = async sid => {
+
+},
+
 
 link = async str => assign(exports,
   {db: { read, update } = db = await jsonStore(str),
-    addArr, user, addUser, updUser, siftSess, sess, ses, addSes, updSes})
+    addArr, user, addUser, updUser, siftSess, sess, ses, addSes, updSes, delSes})
 
 
 assign(exports, {link})
