@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node dataelf.test.js"
+    "test": "node dataelf.test.js",
+    "test-localdb": "node dataelf-localdb.test.js"
   },
   "repository": {
     "type": "git",

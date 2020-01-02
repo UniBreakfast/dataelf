@@ -12,6 +12,15 @@
         "<node_internals>/**"
       ],
       "program": "${workspaceFolder}\\dataelf.test.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "test localdb",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "program": "${workspaceFolder}\\dataelf-localdb.test.js"
     }
   ]
 }
