@@ -4,6 +4,7 @@ const
   { assign, keys, values } = Object,
   c = console.log,
   csv =(...strs)=> [].concat(...strs.map(str => str.split(', '))),
+  id = obj => (obj._id || obj.insertedId).toString(),
 
   dataElf = require('.'),
   { MongoClient, ObjectId } = require('mongodb'),
@@ -101,6 +102,37 @@ const
 
     if (!JSON.same(joe, await dataElf.user({login: joe.login})))
       fail("dataElf.user({login}) didn't find/return the record by its login")
+  }),
+
+  updUser = makeTest("dataElf.updUser(id | {login}, {...props}) is supposed to find and change a user record in the users collection in the db", "and it does.", async (fail, crit)=> {
+
+    if (!methods.includes('updUser')) crit('method not found')
+
+    const hash = '43oi5u6pi43u64u5p',
+          leo = {id: '5e0ef5adf33a0c0aa49a1ec2', login: 'Leo', hash, guess: 2},
+          ted = {login: "Ted", hash, guess: 3, checked: Date.now()},
+          ken = {login: 'Ken', hash, guess: 4},
+
+
+    if (await dataElf.updUser(leo.id, {guess: leo.guess}) !== false)
+      crit("dataElf.updUser(id, {...props}) didn't return false when record not found")
+
+    if (await dataElf.updUser({login: leo.login}, {guess: leo.guess}) !== false)
+      fail("dataElf.updUser({login}, {...props}) didn't return false when record not found")
+
+    ted.id = id(await dataElf.db.users.insertOne({login:ted.login, hash}))
+    ken.id = id(await dataElf.db.users.insertOne({login:ken.login, hash}))
+
+    if (await dataElf.updUser(ted.id, {guess: ted.guess, checked: ted.checked})
+      !== true) fail("dataElf.updUser(id, {...props}) didn't return true when record updated")
+
+    if (await dataElf.updUser({login: ken.login}, {guess: ken.guess}) !== true)
+      fail("dataElf.updUser({login},, {...props}) didn't return true when record updated")
+
+    if (!JSON.same(joe, await dataElf/***********************/))
+      fail("dataElf.updUser(id, {...props}) didn't update the record correctly")
+      fail("dataElf.updUser({login},, {...props}) didn't update the record correctly")
+
 
   })
 
