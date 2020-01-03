@@ -30,11 +30,22 @@ const
     }
   },
 
+  user = async ref => {
+    const id = typeof ref=='string'? ref :0,
+          query = id? {_id: ObjectId(ref)} : ref
+    let record = await db.users.findOne(query)
+    if (record) {
+      record = {id: id || record._id.toString(), ...record}
+      delete record._id
+    }
+    return record
+  },
+
   link = async (str, options={})=> {
     db = (await MongoClient(str, {useUnifiedTopology: true}).connect())
       .db(options.db || 'lldb')
     await prepUsers()
-    return assign(exports, {db, addUser})
+    return assign(exports, {db, addUser, user})
   }
 
 

@@ -20,6 +20,7 @@ const
   runTests = async ()=> {
     await link()
     await addUser(1)
+    await user(1)
   },
 
   link = makeTest("dataElf module is supposed to be exporting an object with .link method to initialize the dataElf with a reference to the db object and add the rest of the methods, also it supposed to return the dataElf object itself", "and it does all that!",
@@ -77,6 +78,30 @@ const
         record.hash!=bob.hash || record.created-timestamp<0 ||
         record.created-timestamp>3e4)
       fail("dataElf.addUser(login, hash) didn't add the record correctly")
+  }),
+
+  user = makeTest("dataElf.user(id | {prop}) is supposed to find and return a user record from the users collection in the db", "and it does.", async (fail, crit)=> {
+
+    if (!methods.includes('user')) crit('method not found')
+
+    const joe = {id: '5e0ef5adf33a0c0aa49a1ec2', login: 'Joe',
+                  hash: "r0wt09er8t9we8rt9"}
+
+    if (await dataElf.user(joe.id) !== null)
+      crit("dataElf.user(id) didn't return null when record not found")
+
+    if (await dataElf.user({login: joe.login}) !== null)
+      fail("dataElf.user({login}) didn't return null when record not found")
+
+    joe.id = (await dataElf.db.users.insertOne({login: joe.login,
+      hash: joe.hash})).insertedId.toString()
+
+    if (!JSON.same(joe, await dataElf.user(joe.id)))
+      fail("dataElf.user(id) didn't find/return the record by its id")
+
+    if (!JSON.same(joe, await dataElf.user({login: joe.login})))
+      fail("dataElf.user({login}) didn't find/return the record by its login")
+
   })
 
 runTests()
